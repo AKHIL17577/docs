@@ -1,79 +1,63 @@
----
-title: About pull requests
-intro: 'Pull requests let you tell others about changes you''ve pushed to a branch in a repository on {% data variables.product.product_name %}. Once a pull request is opened, you can discuss and review the potential changes with collaborators and add follow-up commits before your changes are merged into the base branch.'
-redirect_from:
-  - /github/collaborating-with-issues-and-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests
-  - /articles/using-pull-requests
-  - /articles/about-pull-requests
-  - /github/collaborating-with-issues-and-pull-requests/about-pull-requests
-  - /github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests
-versions:
-  fpt: '*'
-  ghes: '*'
-  ghae: '*'
-  ghec: '*'
-topics:
-  - Pull requests
----
 
-## About pull requests
+Download
+Copy code
+var start = () => {
+ // add constraints if necessary
+ return navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+    .then(stream => {
+      attachVideo(v1, v1info, stream);
+      pc1.addStream(stream);
+    })
+    .catch(console.error);
+};
 
-A pull request is a proposal to merge a set of changes from one branch into another. In a pull request, collaborators can review and discuss the proposed set of changes before they integrate the changes into the main codebase. Pull requests display the differences, or diffs, between the content in the source branch and the content in the target branch.
+var dimensions = v => v.videoWidth + "x" + v.videoHeight;
+var attachVideo = (videoTag, vinfo, stream) => {
+ videoTag.srcObject = stream;
+ videoTag.addEventListener("loadedmetadata", e => update(vinfo, dimensions(videoTag)), false);
+};
 
-{% note %}
+var addCandidate = (pc, can) => can && pc.addIceCandidate(can).catch(console.error);
+pc1.onicecandidate = e => {
+ console.log('pc1.onicecandidate:', e.candidate);
+ addCandidate(pc2, e.candidate);
+};
+pc2.onicecandidate = e => {
+ console.log('pc2.onicecandidate:', e.candidate);
+ addCandidate(pc1, e.candidate);
+};
+pc1.oniceconnectionstatechange = e => console.log("pc1.iceConnState:", pc1.iceConnectionState);
+pc2.oniceconnectionstatechange = e => console.log("pc2.iceConnState:", pc2.iceConnectionState);
 
-**Note:** When working with pull requests, keep the following in mind:
-- If you're working in the [shared repository model](/pull-requests/collaborating-with-pull-requests/getting-started/about-collaborative-development-models), we recommend that you use a topic branch for your pull request. While you can send pull requests from any branch or commit, with a topic branch you can push follow-up commits if you need to update your proposed changes.
-- Be very careful when force pushing commits to a pull request. Force pushing changes the repository history and can corrupt your pull request. If other collaborators branch the project before a force push, the force push may overwrite commits that collaborators based their work on.
+pc1.onnegotiationneeded = e => {
+ pc1.createOffer().then(d => {
+    console.log("pc1.offer_sdp:", d.sdp);
+    return pc1.setLocalDescription(d);
+ })
+    .then(() => pc2.setRemoteDescription(pc1.localDescription))
+    .then(() => pc2.createAnswer())
+    .then(d => {
+      console.log("pc2.answer_sdp:", d.sdp);
+      return pc2.setLocalDescription(d);
+    })
+    .then(() => pc1.setRemoteDescription(pc2.localDescription))
+    .catch(console.error);
+};
 
-{% endnote %}
+pc2.ontrack = e => {
+ console.log('pc2.ontrack, stream id:', e.streams[0].id);
+ console.log('pc2.ontrack, track id:', e.track.id, 'label:', e.track.label, 'kind:', e.track.kind, e.track);
 
-You can create pull requests on {% data variables.product.prodname_dotcom_the_website %}, with {% data variables.product.prodname_desktop %}{% ifversion fpt or ghec %}, in {% data variables.product.prodname_github_codespaces %}{% endif %}, on {% data variables.product.prodname_mobile %}, and when using GitHub CLI.
+ // Attach remote audio to audio tag
+ var audio = document.createElement('audio');
+ audio.srcObject = e.streams[0];
+ audio.autoplay = true;
+ audio.addEventListener('loadedmetadata', function () {
+    console.log('audio track info:', this.srcObject.getAudioTracks()[0]);
+ });
+ document.body.appendChild(audio);
+};
 
-After initializing a pull request, you'll see a review page that shows a high-level overview of the changes between your branch (the compare branch) and the repository's base branch. You can add a summary of the proposed changes, review the changes made by commits, add labels, milestones, and assignees, and @mention individual contributors or teams. For more information, see "[AUTOTITLE](/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)."
+var update = (div, msg) => div.innerHTML = msg;
 
-Once you've created a pull request, you can push commits from your topic branch to add them to your existing pull request. These commits will appear in chronological order within your pull request and the changes will be visible in the "Files changed" tab.
 
-Other contributors can review your proposed changes, add review comments, contribute to the pull request discussion, and even add commits to the pull request. {% ifversion pull-request-approval-limit %}{% data reusables.pull_requests.code-review-limits %}{% endif %}
-
-{% ifversion fpt or ghec %}
-You can see information about the branch's current deployment status and past deployment activity on the "Conversation" tab. For more information, see "[AUTOTITLE](/repositories/viewing-activity-and-data-for-your-repository/viewing-deployment-activity-for-your-repository)."
-{% endif %}
-
-After you're happy with the proposed changes, you can merge the pull request. If you're working in a shared repository model, you create a pull request and you, or someone else, will merge your changes from your feature branch into the base branch you specify in your pull request. For more information, see "[AUTOTITLE](/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/merging-a-pull-request)."
-
-{% data reusables.pull_requests.required-checks-must-pass-to-merge %}
-
-{% data reusables.pull_requests.close-issues-using-keywords %}
-
-{% tip %}
-
-**Tips:**
-- To toggle between collapsing and expanding all outdated review comments in a pull request, hold down <span class="platform-mac"><kbd>Option</kbd></span><span class="platform-linux"><kbd>Alt</kbd></span><span class="platform-windows"><kbd>Alt</kbd></span> and click **Show outdated** or **Hide outdated**. For more shortcuts, see "[AUTOTITLE](/get-started/accessibility/keyboard-shortcuts)."
-- You can squash commits when merging a pull request to gain a more streamlined view of changes. For more information, see "[AUTOTITLE](/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges)."
-
-{% endtip %}
-
-You can visit your dashboard to quickly find links to recently updated pull requests you're working on or subscribed to. For more information, see "[AUTOTITLE](/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-personal-account-settings/about-your-personal-dashboard)."
-
-## Draft pull requests
-
-{% data reusables.gated-features.draft-prs %}
-
-When you create a pull request, you can choose to create a pull request that is ready for review or a draft pull request. Draft pull requests cannot be merged, and code owners are not automatically requested to review draft pull requests. For more information about creating a draft pull request, see "[AUTOTITLE](/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request)" and "[AUTOTITLE](/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork)."
-
-{% data reusables.pull_requests.mark-ready-review %} You can convert a pull request to a draft at any time. For more information, see "[AUTOTITLE](/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request)."
-
-## Differences between commits on compare and pull request pages
-
-The compare and pull request pages use different methods to calculate the diff for changed files:
-
-- Compare pages show the diff between the tip of the head ref and the current common ancestor (that is, the merge base) of the head and base ref.
-- Pull request pages show the diff between the tip of the head ref and the common ancestor of the head and base ref at the time when the pull request was created. Consequently, the merge base used for the comparison might be different.
-
-## Further reading
-
-- "[AUTOTITLE](/get-started/quickstart/github-glossary#pull-request)" in the {% data variables.product.prodname_dotcom %} glossary
-- "[AUTOTITLE](/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches)"
-- "[AUTOTITLE](/pull-requests/collaborating-with-pull-requests/reviewing-changes-in-pull-requests/commenting-on-a-pull-request)"
-- "[AUTOTITLE](/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/closing-a-pull-request)"
